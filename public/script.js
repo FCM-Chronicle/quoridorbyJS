@@ -339,23 +339,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 보드 클릭/마우스 이벤트
     gameBoard.addEventListener('click', (e) => {
-        if (currentAction === 'move' && e.target.classList.contains('highlight')) {
-            const row = parseInt(e.target.dataset.row);
-            const col = parseInt(e.target.dataset.col);
+        const clickedSquare = e.target.closest('.square');
+        if (!clickedSquare) return;
+
+        if (currentAction === 'move' && clickedSquare.classList.contains('highlight')) {
+            const row = parseInt(clickedSquare.dataset.row);
+            const col = parseInt(clickedSquare.dataset.col);
             socket.emit('game-action', currentRoomCode, {
                 type: 'move',
                 payload: { row, col }
             });
         } else if (currentAction === 'wall') {
+            // 벽 설치는 미리보기 위치를 기준으로 하므로 클릭된 칸과 무관합니다.
             const row = parseInt(wallPreview.dataset.row);
             const col = parseInt(wallPreview.dataset.col);
 
-            if (row >= 0 && col >= 0) {
-                socket.emit('game-action', currentRoomCode, {
-                    type: 'place-wall',
-                    payload: { row, col, orientation: wallOrientation }
-                });
-            }
+            socket.emit('game-action', currentRoomCode, {
+                type: 'place-wall',
+                payload: { row: row, col: col, orientation: wallOrientation }
+            });
         }
     });
 
