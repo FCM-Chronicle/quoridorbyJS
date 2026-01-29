@@ -107,12 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
         currentAction = 'wall';
         cancelActionBtn.classList.remove('hidden');
         rotateWallBtn.classList.remove('hidden');
-        wallPreview.classList.remove('hidden');
+        wallPreview.className = `wall ${wallOrientation}`;
     });
     
     rotateWallBtn.addEventListener('click', () => {
         wallOrientation = (wallOrientation === 'horizontal') ? 'vertical' : 'horizontal';
-        wallPreview.className = `wall hidden ${wallOrientation}`;
+        wallPreview.className = `wall ${wallOrientation}`;
     });
 
     cancelActionBtn.addEventListener('click', () => {
