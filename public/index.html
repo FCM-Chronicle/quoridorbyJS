@@ -1,153 +1,83 @@
-/* 기본 스타일 */
-body {
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 쿼리도</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- 초기 화면: 닉네임 설정 -->
+        <div id="nickname-screen">
+            <h1>쿼리도 온라인</h1>
+            <input type="text" id="nickname-input" placeholder="닉네임을 입력하세요" maxlength="10">
+            <button id="nickname-submit">확인</button>
+        </div>
 
-#app-container {
-    display: flex;
-    width: 95vw;
-    height: 95vh;
-    max-width: 1200px;
-    background: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
+        <!-- 로비 선택 화면 -->
+        <div id="lobby-select-screen" class="hidden">
+            <h2>안녕하세요, <span id="user-nickname"></span>님!</h2>
+            <div class="room-actions">
+                <input type="text" id="room-code-input" placeholder="방 코드 (5자 이하)" maxlength="5">
+                <button id="join-room-btn">참가하기</button>
+            </div>
+            <div class="room-actions">
+                <input type="text" id="create-room-code-input" placeholder="새 방 코드 (5자 이하)" maxlength="5">
+                <button id="create-room-btn">방 만들기</button>
+            </div>
+        </div>
 
-.hidden { display: none !important; }
+        <!-- 게임 대기방 (로비) -->
+        <div id="lobby-screen" class="hidden">
+            <h3>방 코드: <span id="lobby-room-code"></span></h3>
+            <h4>참가자</h4>
+            <ul id="player-list"></ul>
+            <button id="start-game-btn" class="hidden">게임 시작</button>
+        </div>
 
-/* 각 화면 스타일 */
-#nickname-screen, #lobby-select-screen, #lobby-screen, #game-over-screen {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
+        <!-- 게임 화면 -->
+        <div id="game-screen" class="hidden">
+            <div id="game-info">
+                <p>현재 턴: <span id="current-turn-player"></span></p>
+                <p>남은 장애물: <span id="walls-left"></span></p>
+            </div>
+            <div id="board-container">
+                <div id="game-board"></div>
+                 <!-- 장애물 미리보기용 -->
+                <div id="wall-preview" class="wall hidden"></div>
+            </div>
+            <div id="game-controls">
+                <button id="move-pawn-btn">말 움직이기</button>
+                <button id="place-wall-btn">장애물 놓기</button>
+                <button id="rotate-wall-btn" class="hidden">회전</button>
+                <button id="cancel-action-btn" class="hidden">취소</button>
+            </div>
+        </div>
+        
+        <!-- 게임 종료 화면 -->
+        <div id="game-over-screen" class="hidden">
+            <h2 id="winner-announcement"></h2>
+            <p>10초 후 로비로 돌아갑니다.</p>
+        </div>
 
-input[type="text"] { padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; }
-button { padding: 10px 15px; border: none; background-color: #007bff; color: white; border-radius: 4px; cursor: pointer; }
-button:hover { background-color: #0056b3; }
+        <!-- 채팅 및 접속자 정보 -->
+        <div id="side-panel">
+            <div id="user-list-container">
+                <h4>접속 중인 유저</h4>
+                <ul id="online-user-list"></ul>
+            </div>
+            <div id="chat-container">
+                <ul id="chat-messages"></ul>
+                <div id="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="메시지 입력...">
+                    <button id="chat-send-btn">전송</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-/* 게임 화면 */
-#game-screen {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-}
-
-#board-container {
-    position: relative;
-    width: 500px;
-    height: 500px;
-    margin: 20px 0;
-}
-
-#game-board {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
-    width: 100%;
-    height: 100%;
-    background-color: #d2b48c;
-    border: 2px solid #8b4513;
-    gap: 4px; /* 칸 사이의 간격 */
-    padding: 4px;
-    box-sizing: border-box;
-}
-
-.square {
-    background-color: #f5deb3;
-    position: relative;
-}
-
-.pawn {
-    width: 80%;
-    height: 80%;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-}
-.pawn-0 { background-color: red; }
-.pawn-1 { background-color: blue; }
-.pawn-2 { background-color: green; }
-.pawn-3 { background-color: yellow; }
-
-.highlight {
-    background-color: rgba(0, 255, 0, 0.5) !important;
-    cursor: pointer;
-}
-
-.wall {
-    position: absolute;
-    background-color: #8b4513;
-    z-index: 10;
-}
-.wall.horizontal {
-    height: 4px; /* 장애물 두께 */
-    width: calc(200% / 9 + 4px); /* 2칸 + 간격 */
-}
-.wall.vertical {
-    width: 4px; /* 장애물 두께 */
-    height: calc(200% / 9 + 4px); /* 2칸 + 간격 */
-}
-#wall-preview {
-    opacity: 0.7;
-    pointer-events: none; /* 마우스 이벤트 통과 */
-}
-
-/* 사이드 패널 (채팅, 유저 목록) */
-#side-panel {
-    width: 300px;
-    border-left: 1px solid #ccc;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-#user-list-container, #chat-container {
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-}
-#chat-container { flex-grow: 1; }
-#chat-messages {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    flex-grow: 1;
-    overflow-y: auto;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-}
-#chat-messages li { padding: 5px; }
-#chat-input-container { display: flex; }
-#chat-input { flex-grow: 1; }
-
-/* 모바일 반응형 */
-@media (max-width: 768px) {
-    #app-container {
-        flex-direction: column;
-    }
-    #side-panel {
-        width: 100%;
-        height: 250px; /* 모바일에서는 높이 제한 */
-        border-left: none;
-        border-top: 1px solid #ccc;
-    }
-    #board-container {
-        width: 90vw;
-        height: 90vw;
-        max-width: 500px;
-        max-height: 500px;
-    }
-}
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
